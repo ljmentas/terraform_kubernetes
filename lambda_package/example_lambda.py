@@ -25,11 +25,11 @@ def process_webpage(url, words):
 # Main function. Entrypoint for Lambda
 def handler(event, context):
 
-    for message in event.Records:
+    for message in event ["Records"]:
         message_dict = json.loads(message["body"])
         result = process_webpage(message_dict['url'], message_dict['words'])
         saved = redis_client.set(message["messageId"], json.dumps(result))
-    return true
+    return True
 
 
 # Manual invocation of the script (only used for testing)
