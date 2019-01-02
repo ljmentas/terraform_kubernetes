@@ -1,32 +1,53 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: webapp-service
+  name: my-nginx
+  labels:
+    run: my-nginx
 spec:
-  selector:
-    app: webapp-pod
-  ports:
-    - name: web
-      port: 80
-      targetPort: 80
   type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  selector:
+    run: my-nginx
 ---
 apiVersion: apps/v1
-kind: ReplicaSet
+kind: Deployment
 metadata:
-  name: webapp-rs
+  name: my-nginx
 spec:
-  replicas: 1
   selector:
     matchLabels:
-      app: webapp-pod
+      run: my-nginx
+  replicas: 1
   template:
     metadata:
       labels:
-        app: webapp-pod
+        run: my-nginx
     spec:
       containers:
-      - name: webapp-pod
+      - name: nginxhttps
+        imagePullPolicy: Always
         image: ljmentas/backend:latest
+        resources:
+          requests:
+            cpu: 400m
         ports:
         - containerPort: 80
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  annotations:
+  name: my-nginx
+spec:
+  maxReplicas: 4
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: extensions/v1
+    kind: Deployment
+    name: my-nginx
+  targetCPUUtilizationPercentage: 30

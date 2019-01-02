@@ -69,11 +69,11 @@ resource "aws_launch_configuration" "demo" {
   associate_public_ip_address = true
   iam_instance_profile        = "${aws_iam_instance_profile.demo-node.name}"
   image_id                    = "${data.aws_ami.eks-worker.id}"
-  instance_type               = "m4.large"
+  instance_type               = "t2.micro"
+  key_name                    = "aws_oraculi_access"
   name_prefix                 = "terraform-eks-demo"
   security_groups             = ["${aws_security_group.demo-node.id}"]
   user_data_base64            = "${base64encode(local.demo-node-userdata)}"
-  iam_instance_profile        = "${aws_iam_instance_profile.test_profile.name}"
 
   lifecycle {
     create_before_destroy = true
@@ -82,7 +82,7 @@ resource "aws_launch_configuration" "demo" {
 
 
 resource "aws_autoscaling_group" "demo" {
-  desired_capacity     = 2
+  desired_capacity     = 4
   launch_configuration = "${aws_launch_configuration.demo.id}"
   max_size             = 5
   min_size             = 1
